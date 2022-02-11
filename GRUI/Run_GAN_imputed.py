@@ -9,6 +9,8 @@ Created on Mon Mar 26 10:47:41 2018
 from __future__ import print_function
 import sys
 sys.path.append("..")
+import numpy as np
+import matplotlib.pyplot as plt
 import argparse
 import os
 import tensorflow as tf
@@ -58,6 +60,7 @@ if __name__ == '__main__':
     base=args.data_path
     data_paths=["30_8_128_64_0.001_400_True_True_True_0.15_0.5"]
     max_auc = 0.0
+    auc_list = []
     for d in data_paths:
         args.data_path=os.path.join(base,d)
         path_splits=args.data_path.split("/")
@@ -95,6 +98,7 @@ if __name__ == '__main__':
                 model.build()
             
                 auc = model.train()
+                auc_list.append(auc)
                 if auc > max_auc:
                     max_auc = auc 
                 
@@ -104,4 +108,7 @@ if __name__ == '__main__':
         f2.write(str(max_auc))
         f2.close()
 
-
+        plt.plot(np.array(lrs), np.array(auc_list), 'ro')
+        plt.ylabel('AUC')
+        plt.xlabel('Learning Rate')
+        plt.show()

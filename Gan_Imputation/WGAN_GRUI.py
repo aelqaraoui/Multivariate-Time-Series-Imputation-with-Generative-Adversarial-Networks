@@ -9,6 +9,7 @@ from tensorflow.python.ops import math_ops
 from ops import *
 from utils import *
 from GRUI import mygru_cell
+import matplotlib.pyplot as plt
 
 """
 D输入标准化， 不要m 填充0
@@ -557,6 +558,7 @@ class WGAN(object):
         batchid=1
         impute_tune_time=1
         counter=1
+        impute_list = []
         for data_x,data_y,data_mean,data_m,data_deltaPre,data_x_lengths,data_lastvalues,_,imputed_deltapre,imputed_m,deltaSub,subvalues,imputed_deltasub in self.datasets.nextBatch():
             #self.z_need_tune=tf.assign(self.z_need_tune,tf.random_normal([self.batch_size,self.z_dim]))
             tf.variables_initializer([self.z_need_tune]).run()
@@ -576,6 +578,7 @@ class WGAN(object):
                                                                   self.keep_prob: 1.0})
                 impute_tune_time+=1
                 counter+=1
+                impute_list.append(impute_loss)
                 if counter%10==0:
                     print("Batchid: [%2d] [%4d/%4d] time: %4.4f, impute_loss: %.8f" \
                           % (batchid, impute_tune_time, self.impute_iter, time.time() - start_time, impute_loss))
@@ -584,6 +587,12 @@ class WGAN(object):
             self.save_imputation(imputed,batchid,data_x_lengths,data_deltaPre,data_y,isTrain)
             batchid+=1
             impute_tune_time=1
+            plt.plot(np.array(impute_list))
+            plt.ylabel('Impute Loss')
+            plt.xlabel('Epochs')
+            plt.show()
+            impute_list = []
+        
     @property
     def model_dir(self):
         return "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(
